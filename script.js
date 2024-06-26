@@ -1,9 +1,18 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const express = require('express');
+const app = express();
+
 
 const directoryPath = "/home/pluz"; // Change this to your desired directory
 const publicDir = path.join(__dirname, 'public');
+
+app.use(express.static(publicDir));  //********VERIFY******* */
+
+app.get('/', (req, res) => {  //*******************VERIFY***************** */
+    res.sendFile(path.join(publicDir, 'index.html'));
+});
 
 //TODO: Going to model it after the file manager "nemo"
 //TODO: Display file contents within a table  make css for table
@@ -23,7 +32,7 @@ const publicDir = path.join(__dirname, 'public');
 //TODO: favicon
 
 
-
+/*
 // Helper function to generate the HTML list
 // Should actually generate a table
 function generateFileListHTML(files) {
@@ -34,9 +43,11 @@ function generateFileListHTML(files) {
     fileListHTML += '</ul>';
     return fileListHTML;
 }
+*/
 
+// Helper function to generate the HTML table
 function generateFileTableHTML(files) {
-    let fileTableHTML = '<table>';
+    let fileTableHTML = '<table border="1" cellspacing="0" cellpadding="5">';
         files.forEach(file => {
             fileTableHTML += `<tr><td>${file}</td></tr>`; //use of backticks
         });
@@ -57,8 +68,8 @@ const server = http.createServer((req, res) => {
                 return;
             }
 
-            // Generate the HTML for the file list
-            const fileListHTML = generateFileListHTML(files);
+            // Generate the HTML for the file table
+            const fileTableHTML = generateFileTableHTML(files);
 
             // Read index.html file
             const filePath = path.join(publicDir, 'index.html');
@@ -71,7 +82,7 @@ const server = http.createServer((req, res) => {
                 }
 
                 // Replace placeholder with the file list HTML
-                const modifiedContent = content.replace('{{FILE_LIST}}', fileListHTML);
+                const modifiedContent = content.replace('{{FILE_LIST}}', fileTableHTML);
 
                 res.writeHead(200, { 'Content-Type': 'text/html' });
                 res.end(modifiedContent, 'utf8');
