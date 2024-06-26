@@ -6,7 +6,8 @@ const directoryPath = "/home/pluz"; // Change this to your desired directory
 const publicDir = path.join(__dirname, 'public');
 
 //TODO: Going to model it after the file manager "nemo"
-//TODO: Display file contents within a table
+//TODO: Display file contents within a table  make css for table
+    // Display meta data within table
 //TODO: Add search bar that allows users to search for files
 //TODO: Color code files directories, executables, pictures, text, etc...
 //TODO: Allow user to traverse through directories
@@ -24,13 +25,24 @@ const publicDir = path.join(__dirname, 'public');
 
 
 // Helper function to generate the HTML list
+// Should actually generate a table
 function generateFileListHTML(files) {
     let fileListHTML = '<ul>';
     files.forEach(file => {
-        fileListHTML += `<li>${file}</li>`;
+        fileListHTML += `<li>${file}</li>`;  //use of back ticks
     });
     fileListHTML += '</ul>';
     return fileListHTML;
+}
+
+function generateFileTableHTML(files) {
+    let fileTableHTML = '<table>';
+        files.forEach(file => {
+            fileTableHTML += `<tr><td>${file}</td></tr>`; //use of backticks
+        });
+    
+    fileTableHTML += '</table>';
+    return fileTableHTML;
 }
 
 // Create a server
