@@ -1,5 +1,5 @@
 # FileShareProject
-A web application meant to allow users to access the web servers files.  
+A web application file manager.  Going to be modeling it after nemo.  Users should be able to download, and upload files.  
 
 This is just supposed to be a fun little project to help me learn javascript, typescript, and react.  Once I have the main functionality of the project complete I will then update it with typescript so that I can have an understanding of why a developer would want to use typescript in the first place.  After understanding typescript I then plan trying to incorparate REACT.  Again this project is meant for me to develop my web skills.
 
