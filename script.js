@@ -1,101 +1,80 @@
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+
 const app = express();
+const port = 3000;
 
+// TODO: I believe that when we are starting the server it automatically takes index.html in its default state
+    // The server is then unable to update it because of 'express.static'
 
-const directoryPath = "/home/pluz"; // Change this to your desired directory
+// I could look to using sockets?
+
+// Define the directory for static files
 const publicDir = path.join(__dirname, 'public');
 
-app.use(express.static(publicDir));  //********VERIFY******* */
+// Serve static files from the public directory
+app.use(express.static(publicDir));
 
-app.get('/', (req, res) => {  //*******************VERIFY***************** */
-    res.sendFile(path.join(publicDir, 'index.html'));
-});
+// Define the directory path to list files from
+const directoryPath = '/home/pluz';  // Replace with your actual directory path
 
-//TODO: Going to model it after the file manager "nemo"
-//TODO: Display file contents within a table  make css for table
-    // Display meta data within table
-//TODO: Add search bar that allows users to search for files
-//TODO: Color code files directories, executables, pictures, text, etc...
-//TODO: Allow user to traverse through directories
-//TODO: Allow
-//TODO: Add: top panel
-//TODO: Add side panel
-//TODO: Keyboard shortcuts (super users)
-
-
-//TODO: Password protected????
-//TODO: add buttons that reveals hidden files
-//TODO: CSS
-//TODO: favicon
-
-
-/*
-// Helper function to generate the HTML list
-// Should actually generate a table
-function generateFileListHTML(files) {
-    let fileListHTML = '<ul>';
-    files.forEach(file => {
-        fileListHTML += `<li>${file}</li>`;  //use of back ticks
-    });
-    fileListHTML += '</ul>';
-    return fileListHTML;
-}
-*/
-
-// Helper function to generate the HTML table
+// Function to generate the HTML table for files
 function generateFileTableHTML(files) {
     let fileTableHTML = '<table border="1" cellspacing="0" cellpadding="5">';
-        files.forEach(file => {
-            fileTableHTML += `<tr><td>${file}</td></tr>`; //use of backticks
-        });
-    
+    files.forEach(file => {
+        fileTableHTML += `<tr><td>${file}</td></tr>`;
+    });
     fileTableHTML += '</table>';
+    console.log('Generated file table HTML:', fileTableHTML);
     return fileTableHTML;
 }
 
-// Create a server
-const server = http.createServer((req, res) => {
-    if (req.url === '/') {
-        // Read the directory contents
-        fs.readdir(directoryPath, (err, files) => {
+// Serve the main HTML file
+app.get('/', (req, res) => {
+    console.log('Received request for /');
+
+    // Read the directory contents
+    fs.readdir(directoryPath, (err, files) => {
+        if (err) {
+            console.error('Error reading directory:', err);
+            res.status(500).send('Server error: Unable to read directory');
+            return;
+        }
+
+        console.log('Files found:', files);
+
+        // Generate the HTML for the file table
+        const fileTableHTML = generateFileTableHTML(files);
+
+        // Read and modify index.html
+        const filePath = path.join(publicDir, 'index.html');
+        fs.readFile(filePath, 'utf8', (err, content) => {
             if (err) {
-                res.writeHead(500, { 'Content-Type': 'text/plain' });
-                res.end('Server error: Unable to read directory');
-                console.error('Error reading directory:', err);
+                console.error('Error reading index.html:', err);
+                res.status(500).send('Server error: Unable to read index.html');
                 return;
             }
 
-            // Generate the HTML for the file table
-            const fileTableHTML = generateFileTableHTML(files);
+            console.log('Original content:', content);
 
-            // Read index.html file
-            const filePath = path.join(publicDir, 'index.html');
-            fs.readFile(filePath, 'utf8', (err, content) => {
-                if (err) {
-                    res.writeHead(500, { 'Content-Type': 'text/plain' });
-                    res.end('Server error: Unable to read index.html');
-                    console.error('Error reading file:', err);
-                    return;
-                }
+            // Replace placeholder with the file list HTML
+            const modifiedContent = content.replace('{{FILE_LIST}}', fileTableHTML);
 
-                // Replace placeholder with the file list HTML
-                const modifiedContent = content.replace('{{FILE_LIST}}', fileTableHTML);
+            // Check if replacement was successful
+            if (modifiedContent.includes('{{FILE_LIST}}')) {
+                console.error('Placeholder {{FILE_LIST}} was not replaced.');
+            } else {
+                console.log('Placeholder {{FILE_LIST}} replaced successfully.');
+            }
 
-                res.writeHead(200, { 'Content-Type': 'text/html' });
-                res.end(modifiedContent, 'utf8');
-            });
+            console.log('Modified content:', modifiedContent);
+            res.send(modifiedContent);
         });
-    } else {
-        // Handle 404
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
-        res.end('Not Found');
-    }
+    });
 });
 
-// Listen on port 3000
-server.listen(3000, () => {
-    console.log('Server running at http://localhost:3000/');
+// Start the server
+app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}/`);
 });
